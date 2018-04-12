@@ -60,8 +60,25 @@ solo un registro de activación, evitando desperdiciar tiempo alocando y
 desalocando registros de activación.
 
 6)
+La primera función tarda siempre lo mismo (38 segundos).
+El tiempo de la segunda función varía, aunque siempre tarda poco menos del doble
+de la primera.
 
 
+7)
+El algoritmo realmente no utiliza los parámetros dados, sino que realiza las
+operaciones de suma, resta, multiplicación y división con valores constantes
+1000000000 veces. De esta manera puede calcular cuanto tardan las operaciones
+mencionadas en ejecutarse (en promedio).
+Tras correr el programa varias veces, se puede concluir que la operación más
+rápidas son la suma la resta y la multiplicación (todas tardan lo mismo),
+y la división tarda el doble que las anteriores.
+Esto se debe a que las tres primeras operaciones pueden realizarse directamente
+en hardware en un ciclo de instrucción (gracias al uso de binario en formato
+ca2), mientras que la división requiere del uso repetido de dichas
+instrucciones en varios pasos.
+
+8)
 
 
 
