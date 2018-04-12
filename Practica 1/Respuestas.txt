@@ -1,0 +1,87 @@
+1) Se producen demoras en la porción de código que accede a las
+posiciones de las matrices.
+1. Por un lado, el acceso no aprovecha la localidad de los datos
+en caché. La caché, al ser una memoria pequeña, no puede almacenar
+toda una fila o una columna de una matriz, solo parte de ella.
+Como el código accede en un mismo llamado a posiciones en dos
+matrices distintas, ocurren muchos fallos de caché. En estos casos
+la caché debe cargar otro bloque de otra matriz.
+Esto podría ser evitado, cargando los bloques de las matrices que
+se necesiten. Por ej: Para la primera matriz, accederla de a filas,
+y en cuanto a la segunda de a columnas.
+2. El código presenta muchos accesos a procedimientos. Esto es muy
+costoso debido a que el sistema operativo está alocando y
+desalocando nuevos registros de activación por cada llamado a
+procedimiento.
+Esto se resuelve, quitando los llamados a procedimientos y resolviendo
+todo en el mismo procedimiento main.
+
+2) El algoritmo SumMulMatricesOpt.c (2) es más rápido porque aprovecha
+mejor el uso de la caché. El algoritmo SumMulMatrices (1) intenta
+resolver la multiplicación accediendo en una misma iteración de for,
+mientras que en (2) accede desde dos for distintos permitiendo de esta
+manera que en caché se mantengan los datos de una matriz utilizada
+frecuentemente y por lo tanto, disminuyendo los fallos de caché.
+
+3)
+El código dado, multiplica matrices por bloques, esto es, ve a la matriz como un
+conjunto de submatrices de igual orden y realiza la multiplicación sobre ellas.
+Este algoritmo es más rápido porque aprovecha de mejor manera la localidad de los
+datos en caché: el algoritmo carga bloques de las tres matrices (un bloque de una
+fila de A, un bloque de una columna de B, y un bloque de una fila de C), y en
+cada iteración, sólo accede a datos dentro de esos bloques. De esta forma, para
+calcular el resultado de cualquier bloque de C sólo carga una vez dicho bloque,
+un bloque de A y algunos de B, evitando muchos fallos de caché y acelerando el
+procesamiento.
+Corrí este algoritmo muchas veces con un procesador i7-4790 (8mb de caché) para
+varios tamaños de matriz y bloque. En esta arquitectura, el tamaño óptimo de
+bloque era 32 (exactamente) para cualquier tamaño de matriz. En conclusión,
+el algoritmo "matrices.exe" es más rápido que "multBloques.exe" para matrices de
+tamaños menores a 32 (de hecho, cuando corrí matrices.exe para una matriz 32*32
+y multBloques.exe para UN bloque de 32 datos, los dos programas tardaban lo mismo).
+
+4)
+"triangular.exe" tarda 52 segundos para una matriz cuadrada de orden 2048.
+"triangularOpt.exe" tarda 32 segundos para una matriz de igual orden.
+El código optimizado realiza la multiplicación de "atrás hacia adelante".
+Recorre primero BT, mientras no encuentre un 0 realizar la multiplicación con
+A y sumar a un total. Esto es válido porque BT es una matriz triangular
+inferior; si fuera triangular superior: recorrer normal y parar cuando se
+encuentre un 0.
+Además, la disposición del acceso a las matrices permite un mejor uso de la
+localidad de las referencias en caché, ahorrando accesos innecesarios.
+
+5)
+El Fibonacci iterativo tarda menos que el recursivo debido a la gran cantidad de
+registros de activación que crea: para calcular cada número de la secuencia,
+calcula el anterior inmediato recursivamente y el anterior al anterior
+en otro llamado recursivo, y los suma. En cambio, el enfoque iterativo, crea
+solo un registro de activación, evitando desperdiciar tiempo alocando y
+desalocando registros de activación.
+
+6)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---------
