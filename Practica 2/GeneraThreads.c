@@ -5,7 +5,9 @@
 
 void * hello_world (void * ptr);
 
-int main(){
+/* Para compilar: gcc -pthread -o salidaEjecutable archivoFuente */
+
+int main() {
   int i, ids[NUM_THREADS];
   pthread_t threads[NUM_THREADS];
 
@@ -24,13 +26,11 @@ int main(){
   }
 
   return 0;
-
 }
 
 void * hello_world (void * ptr){
   int * p, id;
   p = (int *) ptr;
   id = *p;
-  printf("\n¡Hola Mundo! Soy el hilo %d.",id);
-  pthread_exit(0);
+  printf("¡Hola Mundo! Aquí el hilo %d\n",id);
 }
