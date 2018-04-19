@@ -2,86 +2,103 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-int threadCount,
-    threadElems,
-    chunk,
-    N;
-double *A, *B, *C;
+int N,
+    cantThreads = 4,
+    elemsPorThread,
+    chunk;
+int * A, * B, * C;
 
-//Para calcular tiempo
-double dwalltime() {
+double dwalltime(){
   double sec;
   struct timeval tv;
   gettimeofday(&tv,NULL);
   sec = tv.tv_sec + tv.tv_usec/1000000.0;
   return sec;
 }
-
-void * multiplica (void * ptr);
-
-int main(int argc,char*argv[]) {
-
-  if(argc == 2){
+void inicializacion(int argc, char* argv[]){
+  int i = 0;
+  //Controla los parámetros
+  if(argc != 2){
     N = atoi(argv[1]);
-    threadCount = atoi(argv[2]);
+    if((cantThreads = atoi(argv[2])) < 0){
+      cantThreads = 4;
+    }
   } else {
-    printf("Parámetros: Dimensión de la matriz (N) y cantidad de threads.\n", );
+    printf("Error de parámetros...\n");
+    exit(0);
   }
-  threadElems = N*N / threadCount;
-  double timetick;
-  int i, ids[threadCount];
-
-  //threadCount = atoi(argv[2]);
-
   //Aloca memoria para las matrices
-  A=(double*)malloc(sizeof(double)*N*N);
-  B=(double*)malloc(sizeof(double)*N*N);
-  C=(double*)malloc(sizeof(double)*N*N);
+  A=(int*)malloc(sizeof(int)*N*N);
+  B=(int*)malloc(sizeof(int)*N*N);
+  C=(int*)malloc(sizeof(int)*N*N);
+  //Completa las matrices
+  for (i=0; i<N*N; i++){
+    A[i] = 1;
+    B[i] = 1;
+    C[i] = 0;
+  }
+}
+void controlaResultado(){
+  //Verifica el resultado
+  int i = 0,
+      check = N;
+  while(check == N && i < N*N){
+    if((check = C[i])!=N){
+      printf("Resultado Erróneo.\n");
+    }
+    i++;
+  }
+  if(check == N){
+    printf("Resultado Correcto.\n");
+  }
+}
 
-  pthread_t threads[threadCount];
+void * multiplica (void * ptr){
+  int * p, id; p = (int *) ptr; id = *p;
+  int i, j, k;
+  int desp = id * elemsPorThread, final = (id + 1) * elemsPorThread;
+  int res = 0;
+  int a, b;
+  for(i=desp;i<final;i++){
+    for(j=0;j<N;j++){
+      for(k=0;k<N;k++){
+        a = A[i*N+k];
+        b = B[k+j*N];
+        res = res + a * b;
+      }
+      C[i*N+j] = res;
+      res = 0;
+    }
+  }
+}
+
+int main(int argc, char* argv[]){
+  int i;
+  inicializacion(argc, argv);
+
+  elemsPorThread = N / cantThreads;
+  chunk = elemsPorThread / N;
+
+  int ids[cantThreads];
+  pthread_t threads[cantThreads];
   pthread_attr_t attr;
   pthread_attr_init(&attr);
 
-  chunk = N / threadCount;
+  double timetick = dwalltime();
 
-  timetick = dwalltime();
-  // Crea los hilos
-  for (i = 0; i < threadCount; i++) {
+  for (i = 0; i < cantThreads; i++) {
     ids[i] = i;
     pthread_create(&threads[i], &attr, multiplica, &ids[i]);
   }
   // Espera a que los hilos terminen
-  for (i = 0; i < threadCount; i++) {
+  for (i = 0; i < cantThreads; i++) {
     pthread_join(threads[i], NULL);
   }
 
   printf("Tiempo en segundos %f\n", dwalltime() - timetick);
 
-  //Verifica el resultado
-  i = 0;
-  int check = 0;
-  while (check == 0 && i < N*N){
-    check = C[i];
-    i++;
-  }
-  if(check == 0){
-    printf("Resultado Correcto.\n");
-  } else {
-    printf("Resultado Erróneo.\n");
-  }
+  controlaResultado();
 
   return 0;
-}
-
-void * multiplica (void * ptr){
-  int * p, id; p = (int *) ptr; id = *p;
-  int i, j;
-  int desp = threadElems * id;
-  int fin = (id + 1) * threadElems;
-  for (i = desp; i < fin; i++) {
-    for (j = desp; j < fin; j++) {
-      C[i] = C[i] + A[i] * B[j];
-    }
-  }
 
 }
