@@ -62,9 +62,7 @@ void * multiplica (void * ptr){
   for(i=desp;i<final;i++){
     for(j=0;j<N;j++){
       for(k=0;k<N;k++){
-        a = A[i*N+k];
-        b = B[k+j*N];
-        res = res + a * b;
+        res = res + A[i*N+k] * B[k+j*N];
       }
       C[i*N+j] = res;
       res = 0;
