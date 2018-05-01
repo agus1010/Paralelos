@@ -63,12 +63,11 @@ int main(int argc,char*argv[]){
         for(k=0;k<N;k++){
           resultado = resultado + A[i*N+k]*B[k+j*N];
         }
-        C[i*N+j] = C[i*N+j] + resultado;
-        printf("Hilo %d -> %d | ",omp_get_thread_num(),i*N+j);
+        C[i*N+j] = resultado;
       }
     }
   }
-  printf("\nTiempo en segundos %f \n", dwalltime() - timetick);
+  printf("Tiempo en segundos %f \n", dwalltime() - timetick);
 
 
  //Verifica el resultado
