@@ -56,7 +56,7 @@ int main(int argc,char*argv[]){
     desp = tid * elemsPorThread;
     final = (tid + 1) * elemsPorThread;
     //Agregué schedule(dynamic,1), lo que distribuye mejor las iteraciones entre los hilos.
-    //Asigna las iteraciones de manera no determinística
+    //Asigna las iteraciones de manera no determinística sin dar prioridad a ningún hilo
     #pragma omp for schedule(dynamic,1) private(i,j,temp,desp,final) nowait
     for(i=0; i<N; i++){
       for(j=i+1;j<N;j++){
