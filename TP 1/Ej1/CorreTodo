@@ -1,0 +1,17 @@
+#!/bin/bash
+printf "Algoritmo\tN\tHilos\tTiempos\n" > tiempos.csv
+N=512
+Hilos=1
+for (( i = 0; i < 3; i++ )); do
+  printf "Secuencial\t$N\t$Hilos\t" >> tiempos.csv
+  ./secuencial.exe $N | tr -d Tiempo\ en\ segundos\  >> tiempos.csv
+  for (( j = 0; j < 2; j++ )); do
+    let Hilos*=2
+    printf "PThreads\t$N\t$Hilos\t" >> tiempos.csv
+    ./pthreads.exe $N $Hilos | tr -d Tiempo\ en\ segundos\  >> tiempos.csv
+    printf "OpenMP\t$N\t$Hilos\t" >> tiempos.csv
+    ./openmp.exe $N $Hilos | tr -d Tiempo\ en\ segundos\  >> tiempos.csv
+  done
+  let N*=2
+  Hilos=1
+done
