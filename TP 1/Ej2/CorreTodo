@@ -1,0 +1,48 @@
+#!/bin/bash
+printf "Algoritmo\tN\tHilos\tTiempos\n" > tiempos.csv
+N=512
+Hilos=1
+tSecuencial="1"
+tPthreads2="0"
+tOpenmp2="0"
+tPthreads4="0"
+tOpenmp4="0"
+finish=true
+while [[ $finish == true ]]; do
+  
+  echo "Probando para N=$N"
+
+  printf "Secuencial\t$N\t$Hilos\t" >> tiempos.csv
+  tSecuencial="$(./secuencial.exe $N | tr -d Tiempo\ en\ segundos\ )"
+  echo "$tSecuencial" >> tiempos.csv
+
+  let Hilos*=2
+
+  printf "PThreads\t$N\t$Hilos\t" >> tiempos.csv
+  tPthreads2="$(./pthreads.exe $N $Hilos | tr -d Tiempo\ en\ segundos\ )"
+  echo "$tPthreads2" >> tiempos.csv
+
+  printf "OpenMP\t$N\t$Hilos\t" >> tiempos.csv
+  tOpenmp2="$(./openmp.exe $N $Hilos | tr -d Tiempo\ en\ segundos\ )"
+  echo "$tOpenmp2" >> tiempos.csv
+
+  let Hilos*=2
+
+  printf "PThreads\t$N\t$Hilos\t" >> tiempos.csv
+  tPthreads4="$(./pthreads.exe $N $Hilos | tr -d Tiempo\ en\ segundos\ )"
+  echo "$tPthreads4" >> tiempos.csv
+
+  printf "OpenMP\t$N\t$Hilos\t" >> tiempos.csv
+  tOpenmp4="$(./openmp.exe $N $Hilos | tr -d Tiempo\ en\ segundos\ )"
+  echo "$tOpenmp4" >> tiempos.csv
+
+  let N*=2
+
+  Hilos=1
+
+  if [[ "$tSecuencial" > "$tPthreads2" ]]; then
+    if [[ "$tSecuencial" > "$tOpenmp2" ]]; then
+      finish=false
+    fi
+  fi
+done
