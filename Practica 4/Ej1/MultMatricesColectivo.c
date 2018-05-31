@@ -22,8 +22,6 @@ int main(int argc, char * argv[]) {
   for (i = 0; i < N*N; i++) {
     B[i] = 1;
   }
-
-  //MPI_Scatter (void *sendbuf, int cantEnvio, MPI_Datatype tipoDatoEnvio, void*recvbuf, int cantRec, MPI_Datatype tipoDatoRec, int origen, MPI_Comm comunicador)
   if (id == 0) {
     A=(double*)malloc(sizeof(double)*N*N);
     C=(double*)malloc(sizeof(double)*N*N);
@@ -34,30 +32,24 @@ int main(int argc, char * argv[]) {
     MPI_Bcast(B, N*N, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     double timetick = dwalltime();
     MPI_Scatter(A,elemsPorProc,MPI_DOUBLE,A,elemsPorProc,MPI_DOUBLE,0,MPI_COMM_WORLD);
-    for (i = 0; i < elemsPorProc; i++) {
+    for (i = 0; i < elemsPorProc/N; i++) {
       for (j = 0; j < N; j++) {
         for (k = 0; k < N; k++) {
           C[i] += A[i*N+k] * B[k+j*N];
         }
       }
     }
-    //MPI_Gather (void *sendbuf, int cantEnvio, MPI_Datatype tipoDatoEnvio, void*recvbuf, int cantRec, MPI_Datatype tipoDatoRec, int destino, MPI_Comm comunicador)
     MPI_Gather(strip, elemsPorProc, MPI_DOUBLE, A, elemsPorProc, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     printf("El tiempo en segundos es %f.\n", dwalltime() - timetick);
-    /*printf("A:");
-    for (i = 0; i < N; i++) {
-      printf("\n|");
-      for (j = 0; j < N; j++) {
-        printf(" %f |", C[i]);
-      }
-    }
-    printf("\n");*/
+    free(A);
+    free(B);
+    free(C);
   } else {
     strip=(double*)malloc(sizeof(double)*elemsPorProc);
     A=(double*)malloc(sizeof(double)*elemsPorProc);
     MPI_Bcast(B, N*N, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Scatter(A,elemsPorProc,MPI_DOUBLE,A,elemsPorProc,MPI_DOUBLE,0,MPI_COMM_WORLD);
-    for (i = 0; i < elemsPorProc; i++) {
+    for (i = 0; i < elemsPorProc/N; i++) {
       for (j = 0; j < N; j++) {
         for (k = 0; k < N; k++) {
           strip[i] += A[i*N+k] * B[k+j*N];
@@ -65,6 +57,9 @@ int main(int argc, char * argv[]) {
       }
     }
     MPI_Gather(strip, elemsPorProc, MPI_DOUBLE, A, elemsPorProc, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    free(A);
+    free(B);
+    free(strip);
   }
 
   MPI_Finalize();

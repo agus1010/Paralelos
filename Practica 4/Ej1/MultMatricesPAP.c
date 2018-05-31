@@ -32,9 +32,9 @@ int main(int argc, char * argv[]) {
     MPI_Bcast(B, N*N, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     double timetick = dwalltime();
     for (i = 1; i < cant; i++) {
-      MPI_Send(A+i*elemsPorProc, elemsPorProc, MPI_DOUBLE, i, 1, MPI_COMM_WORLD);
+      MPI_Send(A+(i*elemsPorProc), elemsPorProc, MPI_DOUBLE, i, 1, MPI_COMM_WORLD);
     }
-    for (i = 0; i < elemsPorProc; i++) {
+    for (i = 0; i < elemsPorProc/N; i++) {
       for (j = 0; j < N; j++) {
         for (k = 0; k < N; k++) {
           C[i] += A[i*N+k] * B[k+j*N];
@@ -42,13 +42,16 @@ int main(int argc, char * argv[]) {
       }
     }
     for (i = 1; i < cant; i++) {
-      MPI_Recv(C+i*elemsPorProc, elemsPorProc, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &estado);
+      MPI_Recv(C+i*elemsPorProc , elemsPorProc, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &estado);
       /*
       estado.source.
       estado.tag.
       */
     }
     printf("El tiempo en segundos es %f.\n", dwalltime() - timetick);
+    free(A);
+    free(B);
+    free(C);
   }
   else
   {
@@ -60,7 +63,7 @@ int main(int argc, char * argv[]) {
     }
     MPI_Bcast(B, N*N, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Recv(A, elemsPorProc, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD, &estado);
-    for (i = 0; i < elemsPorProc; i++) {
+    for (i = 0; i < elemsPorProc/N; i++) {
       for (j = 0; j < N; j++) {
         for (k = 0; k < N; k++) {
           strip[i] += A[i*N+k] * B[k+j*N];
@@ -68,7 +71,12 @@ int main(int argc, char * argv[]) {
       }
     }
     MPI_Send(strip, elemsPorProc, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD);
+
+    free(A);
+    free(B);
+    free(strip);
   }
+
 
   MPI_Finalize();
 
