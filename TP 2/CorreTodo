@@ -1,0 +1,16 @@
+#!/bin/bash
+printf "Algoritmo\tN\tProcesos\tTiempos\n" > tiempos.csv
+N=1
+for (( i = 0; i < 14; i++ )); do
+  Procesos=1
+  echo Corriendo Secuencial Recursivo con N = $N
+  printf "Secuencial\t$N\t$Procesos\t" >> tiempos.csv
+  ./secuencialRecursivoCuenta.exe $N | tr -d Tiempo\ en\ segundos\  >> tiempos.csv
+  for (( j = 0; j < 3; j++ )); do
+    let Procesos*=2
+    printf "Distribuido\t$N\t$Procesos\t" >> tiempos.csv
+    echo Corriendo Distribuido con $Procesos procesos y N = $N
+    $(echo mpirun -np $Procesos distribuido2.exe $N) | tr -d Tiempo\ en\ segundos\  >> tiempos.csv
+  done
+  let N+=1
+done
